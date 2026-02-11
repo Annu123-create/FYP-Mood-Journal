@@ -1,0 +1,15 @@
+# Node.js
+node_modules/       → ignores all Node packages
+npm-debug.log       → ignores npm debug logs
+.env                → ignores environment variable files (secret keys)
+
+# Capacitor / Android / iOS
+android/            → ignores the Android build folder
+ios/                → ignores the iOS folder
+*.iml               → ignores IDE project files
+.gradle/            → ignores Gradle caches
+build/              → ignores build outputs
+.idea/              → ignores IntelliJ / WebStorm project files
+
+# Optional
+.DS_Store           → ignores Mac system files
