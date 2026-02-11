@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mood Garden - Personality Analyzer</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f8ff; text-align: center; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input, button { padding: 10px; margin: 5px; font-size: 16px; }
+        button { cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px; }
+        #results { margin-top: 20px; text-align: left; border: 1px solid #ddd; padding: 15px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Mood Garden</h1>
+        <h2>Text Predictor</h2>
+        
+        <input type="text" id="textInput" placeholder="Type how you are feeling..." value="i am feeling sad today">
+        <button id="predictButton">PREDICT</button>
+        
+        <div id="results">
+            <p>Results will appear here...</p>
+        </div>
+    </div>
+
+    <script>
+        // Get references to our HTML elements
+        const textInput = document.getElementById('textInput');
+        const predictButton = document.getElementById('predictButton');
+        const resultsDiv = document.getElementById('results');
+
+        // Add a click event listener to the button
+        predictButton.addEventListener('click', () => {
+            const text = textInput.value;
+
+            // Make sure the input is not empty
+            if (!text) {
+                resultsDiv.innerHTML = '<p style="color: red;">Please enter some text.</p>';
+                return;
+            }
+
+            // --- THE CORE CONNECTION ---
+            // Use fetch to send the text to our new backend API
+            fetch('http://localhost:5003/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text }) // Send the text in a JSON object
+            })
+            .then(response => {
+                // Check if the response is okay (status 200)
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Parse the JSON response
+            })
+            .then(data => {
+                console.log('Success:', data); // Log the data for debugging
+
+                // --- DISPLAY THE RESULTS ---
+                // Format the results into a nice HTML string
+                const personality = data.personality_profile;
+                const sentiment = data.sentiment;
+                
+                let html = `<h3>Analysis for: "${data.input_text}"</h3>`;
+                html += `<h4>Personality Profile:</h4>`;
+                html += `<ul>`;
+                for (const trait in personality) {
+                    html += `<li><strong>${trait}:</strong> ${personality[trait]}</li>`;
+                }
+                html += `</ul>`;
+                html += `<h4>Sentiment Scores:</h4>`;
+                html += `<ul>`;
+                html += `<li><strong>Positive:</strong> ${sentiment.pos.toFixed(2)}</li>`;
+                html += `<li><strong>Neutral:</strong> ${sentiment.neu.toFixed(2)}</li>`;
+                html += `<li><strong>Negative:</strong> ${sentiment.neg.toFixed(2)}</li>`;
+                html += `<li><strong>Compound (Overall):</strong> ${sentiment.compound.toFixed(2)}</li>`;
+                html += `</ul>`;
+                
+                resultsDiv.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Failed to get prediction. Is the backend running on port 5003?</p>`;
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "appId": "com.moodgarden.app",
+  "appName": "Mood Garden",
+  "webDir": "public",
+  "bundledWebRuntime": false
+}

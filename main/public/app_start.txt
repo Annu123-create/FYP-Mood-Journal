@@ -1,0 +1,325 @@
+﻿// --- START OF app.js (Modified) ---
+const API = (localStorage.getItem('API_BASE') || '/api');
+const app = document.getElementById('app');
+const relaxAudio = document.getElementById('relax-sound');
+const sounds = {
+    rain: 'sounds/rain.mp3',
+    waves: 'sounds/waves.mp3',
+    chimes: 'sounds/chimes.mp3',
+    lofi_relax: 'sounds/lofi-relax.mp3',
+    lofi: 'sounds/lofi.mp3',
+    meditation_amp: 'sounds/meditation-amp.mp3',
+    meditation_relax: 'sounds/meditation-relax.mp3',
+    garden: 'sounds/morning-garden.mp3',
+    relax_2: 'sounds/relax-2.mp3',
+    relax_4: 'sounds/relax-4.mp3',
+    relax_guitar: 'sounds/relax-guitar.mp3',
+    relax_meditation: 'sounds/relax-meditation.mp3',
+    relax_meditation1: 'sounds/relax-meditation1.mp3',
+    sedative: 'sounds/sedative.mp3'
+};
+
+// Helper function to create user-specific localStorage keys
+function getUserKey(key) {
+    if (!state.user || !state.user.id) return key;
+    return `${state.user.id}_${key}`;
+}
+
+function handleAuthError(response) {
+    if (response.status === 401) {
+        clearToken();
+        state.token = null;
+        showLogin();
+        alert("Your session expired. Please log in again.");
+        return true;
+    }
+    return false;
+}
+
+let state = {
+    token: localStorage.getItem('moodGardenToken') || null,
+    user: null,
+    entries: [],
+    chatHistory: [
+        {
+            role: "system",
+            content: "You are a kind, empathetic, and supportive companion in a mood journaling app. You listen, offer gentle encouragement, and help users reflect on their thoughts and feelings. Do not give medical advice. Keep responses concise and comforting.",
+        },
+    ],
+};
+
+// Mobile Responsiveness Utilities
+/**
+ * Check if current device is mobile (width <= 768px)
+ * @returns {boolean} True if mobile device
+ */
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+/**
+ * Check if current device is a small phone (width <= 480px)
+ * @returns {boolean} True if small phone
+ */
+function isSmallPhone() {
+    return window.innerWidth <= 480;
+}
+
+/**
+ * Check if device is in landscape orientation
+ * @returns {boolean} True if landscape
+ */
+function isLandscape() {
+    return window.innerWidth > window.innerHeight;
+}
+
+/**
+ * Get current breakpoint name
+ * @returns {string} 'mobile', 'tablet', or 'desktop'
+ */
+function getBreakpoint() {
+    if (window.innerWidth <= 480) return 'mobile';
+    if (window.innerWidth <= 768) return 'tablet';
+    if (window.innerWidth <= 900) return 'small-desktop';
+    return 'desktop';
+}
+
+
+// Lottie Player script recommendation - if not already in index.html
+// This should be added to your index.html <head> or right before </body>
+// <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+// Simple validation utility functions
+/**
+ * Sets the JWT token in both the app state and localStorage.
+ * @param {string|null} t - The JWT token, or null to clear it.
+ */
+function setToken(t) {
+    state.token = t;
+    // CORRECTED: Now uses the same key 'moodGardenToken'
+    t ? localStorage.setItem('moodGardenToken', t) : localStorage.removeItem('moodGardenToken');
+}
+/**
+ * Retrieves the JWT token from localStorage.
+ * @returns {string|null} The JWT, or null if it doesn't exist.
+ */
+function getToken() {
+    // This was already correct
+    return localStorage.getItem('moodGardenToken');
+}
+/**
+ * Removes the JWT token from localStorage.
+ */
+function clearToken() {
+    // This was already correct
+    localStorage.removeItem('moodGardenToken');
+}
+
+// Global UI and Navigation Helpers
+function getDisplayName() {
+    let name = '';
+    if (state.user?.username) {
+        name = state.user.username;
+    } else if (state.user?.email) {
+        name = state.user.email.split('@')[0];
+    } else {
+        return 'User';
+    }
+    const lettersOnly = name.match(/^[a-zA-Z]+/);
+    return lettersOnly ? lettersOnly[0] : name;
+}
+
+function getInitial() {
+    const name = getDisplayName();
+    return name.charAt(0).toUpperCase();
+}
+
+function getUserAvatar() {
+    if (state.user && state.user.avatar) {
+        return `<img src="${state.user.avatar}" alt="Profile" class="profile-avatar-img">`;
+    }
+    return getInitial();
+}
+
+function saveCurrentPage(pageId) {
+    localStorage.setItem('currentPage', pageId);
+    state.currentPage = pageId;
+}
+
+function getSavedPage() {
+    return state.currentPage || localStorage.getItem('currentPage') || 'page_home';
+}
+
+function showNotification(message, type = 'info') {
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) existingNotification.remove();
+
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+
+    // Get icon based on type
+    let icon = 'ℹ️';
+    if (type === 'success') icon = '✅';
+    if (type === 'error') icon = '⚠️';
+
+    notification.innerHTML = `
+        <div class="notification-icon">${icon}</div>
+        <div class="notification-body">
+            <div class="notification-message">${message}</div>
+        </div>
+        <div class="notification-progress"></div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => notification.classList.add('show'), 10);
+
+    const duration = 3000;
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 400);
+    }, duration);
+}
+
+function showModal(title, content, footerButtons) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'appModal';
+
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+
+    const modalHeader = document.createElement('div');
+    modalHeader.className = 'modal-header';
+
+    const modalTitle = document.createElement('h2');
+    modalTitle.className = 'modal-title';
+    modalTitle.textContent = title;
+
+    const closeButton = document.createElement('span');
+    closeButton.className = 'close';
+    closeButton.innerHTML = '&times;';
+    closeButton.onclick = () => document.body.removeChild(modal);
+
+    modalHeader.appendChild(modalTitle);
+    modalHeader.appendChild(closeButton);
+
+    const modalBody = document.createElement('div');
+    modalBody.className = 'modal-body';
+    modalBody.innerHTML = content;
+
+    const modalFooter = document.createElement('div');
+    modalFooter.className = 'modal-footer';
+
+    footerButtons.forEach(button => {
+        const btn = document.createElement('button');
+        btn.className = `btn ${button.class}`;
+        btn.textContent = button.text;
+        btn.onclick = button.action;
+        modalFooter.appendChild(btn);
+    });
+
+    modalContent.appendChild(modalHeader);
+    modalContent.appendChild(modalBody);
+    modalContent.appendChild(modalFooter);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    modal.style.display = 'block';
+
+    window.onclick = (event) => {
+        if (event.target === modal) document.body.removeChild(modal);
+    };
+}
+
+async function api(path, opts = {}) {
+    try {
+        // Ensure headers exist
+        const headers = {
+            "Content-Type": "application/json",
+            ...(opts.headers || {})
+        };
+
+        // Add auth token
+        if (state.token) {
+            headers["Authorization"] = "Bearer " + state.token;
+        }
+
+        // Axios request
+        const r = await axios({
+            url: API + path,
+            method: opts.method || "GET",
+            headers,
+            data: opts.body ? JSON.parse(opts.body) : undefined
+        });
+
+        return r.data;
+
+    } catch (e) {
+        console.error("API ERROR:", e);
+
+        // If server returned structured JSON error
+        if (e.response && e.response.data) {
+            return e.response.data;
+        }
+
+        // Fallback message
+        return { success: false, message: "Unexpected server error" };
+    }
+}
+
+async function loadProfile() {
+    if (!state.token) return null;
+
+    try {
+        const res = await api('/auth/me', {
+            method: "GET"
+        });
+
+        if (res?.user) {
+            state.user = res.user;
+            // Sync with localStorage so pages using it (like Profile Settings) have latest data
+            localStorage.setItem('userProfile', JSON.stringify(res.user));
+            return res.user;
+        }
+
+        // Only throw if we have a specific error message
+        if (res?.message) {
+            throw new Error(res.message);
+        }
+
+        return null;
+
+    } catch (err) {
+        console.error("loadProfile() error:", err);
+
+        // ONLY clear token if it's an auth error (e.g. 401)
+        // Check for common auth error indicators
+        const errorMsg = err.message ? err.message.toLowerCase() : "";
+        if (errorMsg.includes("401") || errorMsg.includes("unauthorized") || errorMsg.includes("invalid token") || errorMsg.includes("expired")) {
+            console.warn("Auth failed, clearing session.");
+            clearToken();
+            state.user = null;
+        }
+
+        return null;
+    }
+}
+
+// Load user entries from localStorage (user-specific)
+function loadEntries() {
+    const entries = JSON.parse(localStorage.getItem(getUserKey("moodData")) || "[]");
+    state.entries = entries;
+    return entries;
+}
+
+// Save entries to localStorage (user-specific)
+function saveEntries(entries) {
+    localStorage.setItem(getUserKey("moodData"), JSON.stringify(entries));
+    state.entries = entries;
+}
+
+// Load user profile from localStorage (user-specific)
+function loadUserProfile() {
+    const profile = JSON.parse(localStorage.getItem(getUserKey("userProfile")) || "{}");
+    return profile;
+}
+

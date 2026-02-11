@@ -1,0 +1,291 @@
+/* =============================================================================
+   MOBILE RESPONSIVE STYLES
+============================================================================= */
+
+/* Small Laptops and below (max-width: 900px) */
+/* Login container responsiveness is handled in styles.css */
+/* 
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .info-content {
+        width: 100%;
+        height: 35vh;
+        position: relative;
+    }
+
+    .brand-wrapper {
+        padding: 0 15px;
+    }
+
+    .brand-logo {
+        font-size: 28px;
+    }
+
+    .brand-title {
+        font-size: 14px;
+    }
+
+    .form-box {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 40px 0;
+    }
+
+    .form-content {
+        padding: 0 20px;
+    }
+
+    .social-icons a {
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+}
+*/
+
+/* Tablets and below (max-width: 768px) */
+@media (max-width: 768px) {
+    body {
+        font-size: clamp(14px, 1.5vw + 12px, 16px);
+    }
+
+    header {
+        padding-top: clamp(10px, 5vh, 25px);
+    }
+
+    header h1 {
+        font-size: clamp(1.5em, 5vw, 2em);
+    }
+
+    .app-grid {
+        padding: clamp(8px, 2vw, 15px);
+        gap: clamp(8px, 2vw, 12px);
+    }
+
+    .menu {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: clamp(6px, 1.5vw, 10px);
+    }
+
+    .menu button {
+        padding: clamp(8px, 2vw, 12px);
+        font-size: clamp(13px, 1.5vw + 11px, 15px);
+    }
+
+    #logout {
+        top: 10px;
+        right: 10px;
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    #chatWindow {
+        height: 300px;
+        padding: 12px;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-height: 44px;
+    }
+
+    .chip {
+        padding: 12px;
+        font-size: 14px;
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Mobile Phones (max-width: 480px) */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+
+    header {
+        padding-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    header h1 {
+        font-size: clamp(1.3em, 6vw, 1.6em);
+        letter-spacing: 0.5px;
+    }
+
+    header p {
+        font-size: clamp(0.85em, 3vw, 1em);
+        margin: 4px 0 10px;
+    }
+
+    .app-header {
+        margin-top: clamp(40px, 8vh, 60px);
+        margin-bottom: clamp(5px, 2vh, 15px);
+    }
+
+    .app-title {
+        font-size: clamp(18px, 6vw, 22px);
+    }
+
+    .app-subtitle {
+        font-size: clamp(11px, 3.5vw, 13px);
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    .app-grid {
+        padding: 6px;
+        gap: 8px;
+    }
+
+    .card {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    #maincard {
+        min-height: 300px;
+    }
+
+    .menu {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .menu button {
+        padding: 12px;
+        font-size: 15px;
+        text-align: center;
+        min-height: 48px;
+    }
+
+    .btn {
+        padding: 12px 18px;
+        font-size: 15px;
+        min-height: 48px;
+        width: 100%;
+    }
+
+    .chip {
+        padding: 14px;
+        font-size: 15px;
+        min-height: 48px;
+        min-width: 48px;
+    }
+
+    #logout {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        padding: 10px 16px;
+        font-size: 14px;
+        z-index: 1000;
+        min-height: 44px;
+    }
+
+    #chatWindow {
+        height: 250px;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .chat-message {
+        font-size: 14px;
+        padding: 10px 12px;
+        max-width: 90%;
+    }
+
+    footer {
+        font-size: 11px;
+        padding: 4px 0;
+        margin-top: 5px !important;
+    }
+
+    /* Legacy login styles removed */
+
+    .loader-logo {
+        font-size: 2rem;
+    }
+
+    .loader-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .emoji-particle {
+        font-size: 1.5rem;
+    }
+}
+
+/* Extra Small Phones (max-width: 360px) */
+@media (max-width: 360px) {
+    header h1 {
+        font-size: 1.3em;
+    }
+
+    .app-grid {
+        padding: 4px;
+    }
+
+    .card {
+        padding: 8px;
+    }
+
+    .menu button {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+
+    #chatWindow {
+        height: 200px;
+    }
+
+    .login-card {
+        padding: 16px 14px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        padding-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    header h1 {
+        font-size: 1.3em;
+    }
+
+    header p {
+        display: none;
+    }
+
+    .app-grid {
+        padding: 6px;
+    }
+
+    #chatWindow {
+        height: 180px;
+    }
+
+    #logout {
+        top: 6px;
+        right: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}

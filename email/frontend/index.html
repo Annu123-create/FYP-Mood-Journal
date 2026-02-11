@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      color: #667eea;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #667eea;
+      color: white;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #5a6fd8;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border-radius: 5px;
+      min-height: 1.5rem;
+    }
+
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Email Verification</h1>
+    
+    <div id="emailStep">
+      <input type="email" id="emailInput" placeholder="Enter your email address" />
+      <button id="sendCodeBtn">Send Verification Code</button>
+    </div>
+    
+    <div id="codeStep" class="hidden">
+      <p>Enter the 6-digit code sent to <span id="emailDisplay"></span></p>
+      <input type="text" id="codeInput" placeholder="Enter 6-digit code" maxlength="6" />
+      <button id="verifyBtn">Verify Code</button>
+      <button id="resendBtn">Resend Code</button>
+    </div>
+    
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    const emailStep = document.getElementById('emailStep');
+    const codeStep = document.getElementById('codeStep');
+    const emailInput = document.getElementById('emailInput');
+    const codeInput = document.getElementById('codeInput');
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const resendBtn = document.getElementById('resendBtn');
+    const message = document.getElementById('message');
+    const emailDisplay = document.getElementById('emailDisplay');
+
+    let currentEmail = '';
+    let verificationCode = '';
+
+    // Function to show message
+    function showMessage(text, type = 'error') {
+      message.textContent = text;
+      message.className = `message ${type}`;
+    }
+
+    // Function to validate email
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    // Send verification code
+    sendCodeBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      
+      if (!email) {
+        showMessage('Please enter an email address');
+        return;
+      }
+      
+      if (!isValidEmail(email)) {
+        showMessage('Please enter a valid email address');
+        return;
+      }
+      
+      sendCodeBtn.disabled = true;
+      sendCodeBtn.textContent = 'Sending...';
+      
+      try {
+        currentEmail = email;
+        
+        // Replace the simulated send code with actual API call
+        const response = await fetch('http://localhost:3000/send-verification-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to send verification code');
+        }
+        
+        emailDisplay.textContent = email;
+        emailStep.classList.add('hidden');
+        codeStep.classList.remove('hidden');
+        showMessage('Verification code sent! Check your email.', 'success');
+        
+      } catch (error) {
+        showMessage(error.message || 'Failed to send verification code. Please try again.');
+        console.error('Error sending code:', error);
+      } finally {
+        sendCodeBtn.disabled = false;
+        sendCodeBtn.textContent = 'Send Verification Code';
+      }
+    });
+
+    // Verify code
+    verifyBtn.addEventListener('click', async () => {
+      const code = codeInput.value.trim();
+      
+      if (!code || code.length !== 6) {
+        showMessage('Please enter a valid 6-digit code');
+        return;
+      }
+      
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Verifying...';
+      
+      try {
+        // Replace the simulated verify with actual API call
+        const response = await fetch('http://localhost:3000/verify-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentEmail, code })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Invalid verification code');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('Email verified successfully!', 'success');
+          // Here you could redirect to another page or perform further actions
+        } else {
+          showMessage('Invalid verification code. Please try again.');
+        }
+        
+      } catch (error) {
+        showMessage(error.message || 'Verification failed. Please try again.');
+        console.error('Error verifying code:', error);
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify Code';
+      }
+    });
+
+    // Resend code
+    resendBtn.addEventListener('click', () => {
+      codeInput.value = '';
+      emailStep.classList.remove('hidden');
+      codeStep.classList.add('hidden');
+      showMessage('');
+    });
+
+    // Allow only numbers in code input
+    codeInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+  </script>
+</body>
+</html>

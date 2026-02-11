@@ -1,0 +1,9 @@
+{
+  "short_name": "Mood Garden",
+  "name": "Mood Garden: Emotional Wellbeing",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#8b5cf6",
+  "background_color": "#ffffff"
+}

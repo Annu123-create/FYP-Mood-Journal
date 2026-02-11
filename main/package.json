@@ -1,0 +1,14 @@
+{
+  "name": "mood-garden",
+  "version": "1.0.0",
+  "description": "Emotional wellness companion",
+  "main": "app.js",
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1"
+  },
+  "scripts": {
+    "build": "echo 'Build step not configured' && exit 0"
+  }
+}

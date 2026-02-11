@@ -1,0 +1,8 @@
+{
+  "appId": "com.moodgarden.app",
+  "appName": "Mood Garden",
+  "webDir": "main/public",
+  "server": {
+    "androidScheme": "https"
+  }
+}
